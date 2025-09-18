@@ -22,7 +22,6 @@ Secrets should be provided via cluster-level configuration or environment variab
 Example job arguments:
 ```yaml
 args:
-  - "--kafka.topic=lab-orders-ack"
   - "--kafka.group.id=orders-ack-consumer"
   - "--jdbc.url=jdbc:postgresql://db:5432/hie_manager"
 ```

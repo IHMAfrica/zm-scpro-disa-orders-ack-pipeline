@@ -66,7 +66,7 @@ Supported keys (CLI args use --key=value form):
 
 Example CLI args:
 - --kafka.bootstrap.servers=broker1:9092,broker2:9092
-- --kafka.topic=orders-ack
+- --kafka.topic=lab-orders-ack
 - --jdbc.url=jdbc:postgresql://db:5432/hie_manager
 
 ## Runtime Image
