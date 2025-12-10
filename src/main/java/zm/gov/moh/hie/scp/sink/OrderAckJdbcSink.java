@@ -10,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 public class OrderAckJdbcSink extends RichSinkFunction<OrderAck> {
     private static final Logger LOG = LoggerFactory.getLogger(OrderAckJdbcSink.class);
@@ -63,12 +64,20 @@ public class OrderAckJdbcSink extends RichSinkFunction<OrderAck> {
             }
 
             // Step 2: Insert into crt.order_ack using the generated message ID
-            String insertAckSql = "INSERT INTO crt.order_ack (id, code, order_message_ref_id, message) VALUES (?, ?, ?, ?)";
+            String insertAckSql = "INSERT INTO crt.order_ack (id, code, order_message_ref_id, message, created_at, received_at) VALUES (?, ?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = connection.prepareStatement(insertAckSql)) {
                 stmt.setLong(1, messageId);
                 stmt.setString(2, orderAck.getCode());
                 stmt.setString(3, orderAck.getOrderMessageRefId());
                 stmt.setString(4, orderAck.getMessage());
+                // Set created_at from HL7 message timestamp, or null if not available
+                if (orderAck.getCreatedAt() != null) {
+                    stmt.setTimestamp(5, Timestamp.valueOf(orderAck.getCreatedAt()));
+                } else {
+                    stmt.setNull(5, java.sql.Types.TIMESTAMP);
+                }
+                // Set received_at to current timestamp
+                stmt.setTimestamp(6, Timestamp.valueOf(orderAck.getReceivedAt()));
                 int rowsAffected = stmt.executeUpdate();
                 LOG.info("Inserted OrderAck record, rows affected: {}", rowsAffected);
             }
